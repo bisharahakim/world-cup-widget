@@ -152,10 +152,19 @@ const formatKickoff = (iso) => {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-const isToday = (iso) => {
+const isTomorrow = (iso) => {
   const d = new Date(iso)
   const now = new Date()
-  return d.toDateString() === now.toDateString()
+  const tmr = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+  return d.toDateString() === tmr.toDateString()
+}
+
+const isInWindow = (iso) => {
+  const d = new Date(iso)
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 7, 0, 0)
+  return d >= startOfToday && d < cutoff
 }
 
 const renderGame = (event) => {
@@ -182,7 +191,7 @@ const renderGame = (event) => {
       {isPre ? (
         <div className="score-block">
           <div className="kickoff">{formatKickoff(event.date)}</div>
-          <div className="status">Kickoff</div>
+          <div className="status">{isTomorrow(event.date) ? 'Tomorrow' : 'Kickoff'}</div>
         </div>
       ) : (
         <div className="score-block">
@@ -239,7 +248,7 @@ export const render = ({ output, error }) => {
     )
   }
 
-  const events = (data.events || []).filter((e) => isToday(e.date))
+ const events = (data.events || []).filter((e) => isInWindow(e.date))
 
   return (
     <div>
